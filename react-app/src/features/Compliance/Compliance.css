@@ -1,0 +1,185 @@
+/* Standard tabs */
+.cmp-std-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.cmp-std-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.1rem;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.cmp-std-tab:hover  { border-color: var(--sc); color: var(--text-primary); }
+.cmp-std-tab.active { border-color: var(--sc); background: rgba(255,255,255,0.04); color: var(--text-primary); }
+
+.cmp-std-name { font-weight: 800; font-size: 0.9rem; color: var(--text-primary); }
+.cmp-std-ver  { font-size: 0.68rem; color: var(--text-secondary); }
+
+/* Layout */
+.cmp-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.cmp-left { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Requirements */
+.cmp-req-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cmp-req-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.cmp-req-row:hover  { border-color: var(--accent); }
+.cmp-req-row.active { border-color: var(--accent); background: var(--accent-subtle); }
+
+.cmp-cov-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-full    { background: var(--success); }
+.dot-partial { background: var(--warning); }
+.dot-none    { background: var(--danger); }
+
+.cmp-req-info { flex: 1; }
+
+.cmp-req-num   { font-size: 0.7rem; color: var(--text-muted); font-family: monospace; margin-bottom: 2px; }
+.cmp-req-title { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+
+.cmp-cov-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-full    { background: rgba(52,211,153,0.12);  color: var(--success); }
+.badge-partial { background: rgba(251,191,36,0.12);  color: var(--warning); }
+.badge-none    { background: rgba(248,113,113,0.10);  color: var(--danger); }
+
+/* Requirement detail */
+.cmp-req-detail {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.cmp-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.cmp-detail-num   { font-family: monospace; font-size: 0.78rem; color: var(--text-muted); }
+.cmp-detail-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem; }
+
+.cmp-detail-ela-label { font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+.cmp-detail-ela-text  { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65; }
+
+/* Summary card */
+.cmp-right { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.cmp-summary-card { text-align: center; }
+.cmp-std-full-name { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.4; }
+
+.cmp-score-ring {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 1.5rem;
+}
+
+.cmp-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.cmp-ring-bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.08);
+  stroke-width: 10;
+}
+
+.cmp-ring-fill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dashoffset: 0;
+  transition: stroke-dasharray 0.8s ease;
+}
+
+.cmp-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cmp-ring-pct { font-size: 2rem; font-weight: 800; line-height: 1; }
+.cmp-ring-sub { font-size: 0.72rem; color: var(--text-secondary); }
+
+/* Breakdown */
+.cmp-coverage-breakdown { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; text-align: left; }
+
+.cmp-cov-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.83rem;
+}
+
+.cmp-cov-label { flex: 1; color: var(--text-secondary); }
+.cmp-cov-count { font-weight: 800; font-size: 1rem; }
+
+.cmp-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  text-align: left;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ELA value */
+.cmp-ela-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.6rem;
+  line-height: 1.5;
+}

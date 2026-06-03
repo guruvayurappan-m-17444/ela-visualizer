@@ -1,0 +1,213 @@
+.al-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.al-panel { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Fields */
+.al-field   { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+.al-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.al-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.al-select, .al-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.al-select:focus, .al-input:focus { border-color: var(--accent); }
+.al-select option { background: var(--bg-card); }
+.al-input { width: 100%; }
+
+/* Severity */
+.al-severity-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.al-sev-btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-muted);
+}
+
+.al-sev-btn:hover { opacity: 0.85; }
+
+.al-sev-btn.sev-critical.active { background: rgba(248,113,113,0.15); border-color: var(--danger);  color: var(--danger); }
+.al-sev-btn.sev-high.active     { background: rgba(251,146,60,0.15);  border-color: #fb923c;       color: #fb923c; }
+.al-sev-btn.sev-medium.active   { background: rgba(251,191,36,0.15);  border-color: var(--warning); color: var(--warning); }
+.al-sev-btn.sev-low.active      { background: rgba(52,211,153,0.15);  border-color: var(--success); color: var(--success); }
+
+/* Channels */
+.al-channels { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.al-channel-btn {
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.al-channel-btn:hover    { border-color: var(--accent); color: var(--text-primary); }
+.al-channel-btn.selected { background: var(--accent-subtle); border-color: var(--accent); color: var(--text-primary); }
+
+/* Rule summary */
+.al-rule-summary {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.al-rule-text { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; }
+
+.sev-text-critical { color: var(--danger); }
+.sev-text-high     { color: #fb923c; }
+.sev-text-medium   { color: var(--warning); }
+.sev-text-low      { color: var(--success); }
+
+.al-buttons { display: flex; gap: 0.75rem; }
+
+/* Alert cards */
+.al-alerts-panel { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.al-alert-card {
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  border: 1px solid;
+  animation: alertPop 0.4s ease both;
+}
+
+@keyframes alertPop {
+  0%   { opacity: 0; transform: scale(0.95) translateY(-6px); }
+  60%  { transform: scale(1.02) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.sev-card-critical { background: rgba(248,113,113,0.08);  border-color: rgba(248,113,113,0.25); }
+.sev-card-high     { background: rgba(251,146,60,0.08);  border-color: rgba(251,146,60,0.25); }
+.sev-card-medium   { background: rgba(251,191,36,0.08);  border-color: rgba(251,191,36,0.25); }
+.sev-card-low      { background: rgba(52,211,153,0.08);  border-color: rgba(52,211,153,0.25); }
+
+.al-alert-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+
+.al-sev-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.sev-critical { background: rgba(248,113,113,0.12); color: var(--danger); }
+.sev-high     { background: rgba(251,146,60,0.12);  color: #fb923c; }
+.sev-medium   { background: rgba(251,191,36,0.12);  color: var(--warning); }
+.sev-low      { background: rgba(52,211,153,0.12);  color: var(--success); }
+
+.al-alert-time  { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; }
+.al-alert-title { font-size: 0.93rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+.al-alert-detail{ font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+.al-notified { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.75rem; color: var(--text-muted); }
+
+.al-notif-chip {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+/* Stream */
+.al-stream-card { height: 100%; display: flex; flex-direction: column; min-height: 520px; }
+
+.al-stream-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.al-live-dot {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--danger);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink { 0%,100%{ opacity:1 } 50%{ opacity:0 } }
+
+.al-match-count {
+  font-size: 0.8rem;
+  color: var(--warning);
+  background: rgba(243,156,18,0.1);
+  border: 1px solid rgba(243,156,18,0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+.al-stream-body {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 460px;
+}
+
+.al-stream-empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 3rem;
+  font-family: inherit;
+}
+
+.al-stream-row {
+  display: grid;
+  grid-template-columns: 70px 50px 90px 1fr;
+  gap: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  align-items: center;
+}
+
+.row-anim { animation: slideInRow 0.2s ease both; }
+
+.normal-row { color: var(--text-muted); }
+.match-row  { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: var(--text-primary); }
+
+.al-ev-time { color: var(--text-muted); font-size: 0.72rem; }
+.al-ev-src  { color: var(--accent); font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; }
+.al-ev-msg  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.77rem; }
+
+.al-type-info { color: var(--info); }
+.al-type-warn { color: var(--warning); font-weight: 700; }
+.al-type-crit { color: var(--danger); font-weight: 700; }

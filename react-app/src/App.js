@@ -1,26 +1,39 @@
-import { Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout/Layout';
-import Dashboard from './components/Dashboard/Dashboard';
-import LogCollection from './components/LogCollection/LogCollection';
-import LogParsing from './components/LogParsing/LogParsing';
-import Alerting from './components/Alerting/Alerting';
-import Reporting from './components/Reporting/Reporting';
-import Compliance from './components/Compliance/Compliance';
-import Correlation from './components/Correlation/Correlation';
+import { useState } from 'react';
+import './App.css';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Dashboard from './features/Dashboard';
+import LogCollection from './features/LogCollection';
+import LogParsing from './features/LogParsing';
+import Alerting from './features/Alerting';
+import Reporting from './features/Reporting';
+import Compliance from './features/Compliance';
+import Correlation from './features/Correlation';
+
+const VIEWS = {
+  'dashboard':      Dashboard,
+  'log-collection': LogCollection,
+  'log-parsing':    LogParsing,
+  'alerting':       Alerting,
+  'reporting':      Reporting,
+  'compliance':     Compliance,
+  'correlation':    Correlation,
+};
 
 function App() {
+  const [activeView, setActiveView] = useState('dashboard');
+  const ActivePage = VIEWS[activeView] || Dashboard;
+
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/log-collection" element={<LogCollection />} />
-        <Route path="/log-parsing" element={<LogParsing />} />
-        <Route path="/alerting" element={<Alerting />} />
-        <Route path="/reporting" element={<Reporting />} />
-        <Route path="/compliance" element={<Compliance />} />
-        <Route path="/correlation" element={<Correlation />} />
-      </Routes>
-    </Layout>
+    <div className="app-shell">
+      <Header />
+      <div className="app-body">
+        <Sidebar activeView={activeView} onSelect={setActiveView} />
+        <main className="app-main">
+          <ActivePage onNavigate={setActiveView} />
+        </main>
+      </div>
+    </div>
   );
 }
 

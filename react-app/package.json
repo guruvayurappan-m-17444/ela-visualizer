@@ -6,13 +6,9 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
-    "framer-motion": "^12.40.0",
-    "lucide-react": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.16.0",
     "react-scripts": "5.0.1",
-    "recharts": "^3.8.1",
     "web-vitals": "^1.1.2",
     "zcatalyst-cli-plugin-react": "^0.0.4"
   },

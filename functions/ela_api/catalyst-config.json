@@ -1,7 +1,0 @@
-{
-  "deployment": {
-    "name": "ela_api",
-    "stack": "python",
-    "type": "advancedio"
-  }
-}
