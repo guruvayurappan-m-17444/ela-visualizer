@@ -3,13 +3,20 @@
   "project_domain": "",
   "client": {
     "type": "reactjs",
-    "build_path": "client"
+    "build_path": "client",
+    "source": "react-app",
+    "plugin": "zcatalyst-cli-plugin-react"
   },
   "functions": {
     "ela_api": {
       "type": "advancedio",
       "language": "python",
       "path": "functions/ela_api"
-    }
+    },
+    "targets": [
+      "node_function"
+    ],
+    "ignore": [],
+    "source": "functions"
   }
 }
