@@ -1,0 +1,15 @@
+{
+  "project_id": "",
+  "project_domain": "",
+  "client": {
+    "type": "reactjs",
+    "build_path": "client"
+  },
+  "functions": {
+    "ela_api": {
+      "type": "advancedio",
+      "language": "python",
+      "path": "functions/ela_api"
+    }
+  }
+}
