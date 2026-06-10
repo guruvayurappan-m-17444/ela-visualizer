@@ -256,18 +256,86 @@ const detectParserId = (raw) => {
   return null;
 };
 
+// Parsers that operate on individual lines and support batch mode
+const BATCH_PARSERS = new Set(['linux-auth', 'apache', 'cisco']);
+
+const parseBatch = (raw, parserId) => {
+  const parser = PARSER_BY_ID[parserId];
+  if (!parser) return null;
+  const lines = raw.split('\n').filter((l) => l.trim().length > 0);
+  const records = lines
+    .map((line, idx) => ({ lineNum: idx + 1, raw: line, fields: parser(line) }))
+    .filter((r) => r.fields.length > 0);
+  return records.length > 0 ? records : null;
+};
+
+// Confidence scoring: pattern-match checks for auto-detect mode
+const DETECTION_CHECKS = {
+  win4624: (raw) => {
+    let s = 0;
+    if (/^Log Name:\s+/m.test(raw))   s += 25;
+    if (/^Event ID:\s+/m.test(raw))   s += 25;
+    if (/^Computer:\s+/m.test(raw))   s += 20;
+    if (/^Date:\s+/m.test(raw))       s += 15;
+    if (/^Level:\s+/m.test(raw))      s += 15;
+    return s;
+  },
+  cisco: (raw) => {
+    let s = 0;
+    if (/^%ASA-\d-\d+:/m.test(raw))              s += 50;
+    if (/src\s+\w+:[\d.]+\/\d+/i.test(raw))      s += 25;
+    if (/dst\s+\w+:[\d.]+\/\d+/i.test(raw))      s += 25;
+    return s;
+  },
+  'linux-auth': (raw) => {
+    let s = 0;
+    if (/^[A-Za-z]{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}/m.test(raw)) s += 30;
+    if (/sshd\[\d+\]:/m.test(raw))                                  s += 40;
+    if (/Accepted\s+\w+\s+for/i.test(raw))                         s += 20;
+    if (/from\s+[\d.]+\s+port\s+\d+/i.test(raw))                  s += 10;
+    return s;
+  },
+  apache: (raw) => {
+    let s = 0;
+    if (/"(GET|POST|PUT|DELETE|HEAD|PATCH|OPTIONS)\s+/i.test(raw)) s += 30;
+    if (/"\s+\d{3}\s+\d+/.test(raw))                               s += 30;
+    if (/HTTP\/\d\.\d/.test(raw))                                   s += 25;
+    if (/\[[^\]]+\]/.test(raw))                                     s += 15;
+    return s;
+  },
+};
+
+const EXPECTED_FIELD_COUNTS = { win4624: 10, 'linux-auth': 9, apache: 10, cisco: 11 };
+
+const computeConfidence = (raw, parserId, extractedFields) => {
+  const checkFn = DETECTION_CHECKS[parserId];
+  const detectionScore = checkFn ? checkFn(raw) : 0; // 0–100
+  const expected = EXPECTED_FIELD_COUNTS[parserId] || 8;
+  const fieldScore = Math.min(Math.round((extractedFields.length / expected) * 100), 100);
+  return Math.min(Math.round(detectionScore * 0.65 + fieldScore * 0.35), 100);
+};
+
+const confidenceLevel = (score) => {
+  if (score >= 90) return 'high';
+  if (score >= 70) return 'medium';
+  return 'low';
+};
+
 function LogParsing() {
-  const [selType, setSelType]       = useState('auto');
-  const [inputMode, setInputMode]   = useState('text');
-  const [inputText, setInputText]   = useState('');
-  const [fileName, setFileName]     = useState('');
-  const [parsedCount, setParsedCount] = useState(0);
-  const [isParsing, setIsParsing]   = useState(false);
-  const [activeRaw, setActiveRaw]   = useState('');
+  const [selType, setSelType]           = useState('auto');
+  const [inputMode, setInputMode]       = useState('text');
+  const [inputText, setInputText]       = useState('');
+  const [fileName, setFileName]         = useState('');
+  const [parsedCount, setParsedCount]   = useState(0);
+  const [isParsing, setIsParsing]       = useState(false);
+  const [activeRaw, setActiveRaw]       = useState('');
   const [parsedFields, setParsedFields] = useState([]);
-  const [done, setDone]             = useState(false);
-  const [error, setError]           = useState('');
+  const [done, setDone]                 = useState(false);
+  const [error, setError]               = useState('');
   const [activeParserId, setActiveParserId] = useState('');
+  const [batchRecords, setBatchRecords] = useState([]);
+  const [isBatchMode, setIsBatchMode]   = useState(false);
+  const [confidenceScore, setConfidenceScore] = useState(0);
 
   const logType = LOG_TYPES.find(l => l.id === selType);
 
@@ -284,6 +352,9 @@ function LogParsing() {
     setActiveParserId('');
     setParsedFields([]);
     setActiveRaw('');
+    setBatchRecords([]);
+    setIsBatchMode(false);
+    setConfidenceScore(0);
   };
 
   const loadSample = () => {
@@ -384,28 +455,91 @@ function LogParsing() {
       return;
     }
 
-    const fields = parser(raw);
-    if (!fields.length) {
-      setError('Log format does not match the selected parser profile. Check the input and try again.');
-      return;
+    // Attempt batch mode for line-oriented parsers with multiple input lines
+    const batchResults = BATCH_PARSERS.has(resolvedParserId) ? parseBatch(raw, resolvedParserId) : null;
+    const useBatch = batchResults !== null && batchResults.length > 1;
+
+    if (useBatch) {
+      const firstFields = batchResults[0]?.fields || [];
+      if (!firstFields.length) {
+        setError('Log format does not match the selected parser profile. Check the input and try again.');
+        return;
+      }
+
+      setActiveRaw(raw);
+      setActiveParserId(resolvedParserId);
+      setParsedFields(firstFields);
+      setBatchRecords(batchResults);
+      setIsBatchMode(true);
+      if (selType === 'auto') {
+        setConfidenceScore(computeConfidence(raw, resolvedParserId, firstFields));
+      }
+      setParsedCount(0);
+      setIsParsing(true);
+
+      let count = 0;
+      const iv = setInterval(() => {
+        count++;
+        setParsedCount(count);
+        if (count >= batchResults.length) {
+          clearInterval(iv);
+          setIsParsing(false);
+          setDone(true);
+        }
+      }, 150);
+    } else {
+      const fields = parser(raw);
+      if (!fields.length) {
+        setError('Log format does not match the selected parser profile. Check the input and try again.');
+        return;
+      }
+
+      setActiveRaw(raw);
+      setParsedFields(fields);
+      setActiveParserId(resolvedParserId);
+      setIsBatchMode(false);
+      if (selType === 'auto') {
+        setConfidenceScore(computeConfidence(raw, resolvedParserId, fields));
+      }
+      setParsedCount(0);
+      setIsParsing(true);
+
+      let count = 0;
+      const iv = setInterval(() => {
+        count++;
+        setParsedCount(count);
+        if (count >= fields.length) {
+          clearInterval(iv);
+          setIsParsing(false);
+          setDone(true);
+        }
+      }, 220);
+    }
+  };
+
+  const downloadJSON = () => {
+    let data;
+    if (isBatchMode) {
+      data = batchRecords.map((r) => {
+        const obj = { _line: r.lineNum };
+        r.fields.forEach((f) => { obj[f.name] = f.value; });
+        return obj;
+      });
+    } else {
+      const obj = {};
+      parsedFields.forEach((f) => { obj[f.name] = f.value; });
+      data = obj;
     }
 
-    setActiveRaw(raw);
-    setParsedFields(fields);
-    setActiveParserId(resolvedParserId);
-    setParsedCount(0);
-    setIsParsing(true);
-
-    let count = 0;
-    const iv = setInterval(() => {
-      count++;
-      setParsedCount(count);
-      if (count >= fields.length) {
-        clearInterval(iv);
-        setIsParsing(false);
-        setDone(true);
-      }
-    }, 220);
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = isBatchMode ? 'parsed-batch.json' : 'parsed-log.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const activeParser = LOG_TYPES.find((entry) => entry.id === activeParserId);
@@ -486,9 +620,25 @@ function LogParsing() {
         {(parsedCount > 0 || done) && (
           <button className="btn btn-secondary" onClick={reset}>↺ Reset</button>
         )}
-        {done && <span className="lp-done-badge">✓ {parsedFields.length} fields extracted</span>}
+        {done && (
+          <span className="lp-done-badge">
+            {isBatchMode
+              ? `✓ ${batchRecords.length} records parsed`
+              : `✓ ${parsedFields.length} fields extracted`}
+          </span>
+        )}
         {done && activeParser && (
-          <span className="lp-parser-pill">Parser used: {activeParser.label}</span>
+          <span className="lp-parser-pill">Parser: {activeParser.label}</span>
+        )}
+        {done && selType === 'auto' && (
+          <span className={`lp-confidence-pill lp-confidence-${confidenceLevel(confidenceScore)}`}>
+            Confidence: {confidenceScore}%
+          </span>
+        )}
+        {done && (
+          <button className="btn btn-secondary lp-download-btn" onClick={downloadJSON}>
+            ⬇ Download JSON
+          </button>
         )}
       </div>
 
@@ -499,13 +649,19 @@ function LogParsing() {
             <div className="lp-raw-header">
               <span className="lp-raw-badge">RAW</span>
               <span className="lp-raw-title">{activeParser?.label || 'Detected log format'}</span>
+              {isBatchMode && (
+                <span className="lp-batch-pill">
+                  BATCH · {batchRecords.length} lines
+                </span>
+              )}
             </div>
             <pre className="lp-raw-text">{activeRaw}</pre>
           </div>
         </>
       )}
 
-      {parsedCount > 0 && (
+      {/* Single-record mode: animated field extraction cards */}
+      {!isBatchMode && parsedCount > 0 && (
         <div className="lp-parsed-grid">
           {parsedFields.slice(0, parsedCount).map((f) => (
             <div
@@ -521,7 +677,8 @@ function LogParsing() {
         </div>
       )}
 
-      {done && (
+      {/* Single-record mode: normalized record table */}
+      {!isBatchMode && done && (
         <div className="lp-norm-box fade-in">
           <div className="lp-norm-header">
             <span className="lp-raw-badge success-badge">NORMALIZED</span>
@@ -534,6 +691,51 @@ function LogParsing() {
                 <span className="lp-norm-val" style={{ color: f.color }}>{f.value}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Batch mode: one normalized record per parsed line */}
+      {isBatchMode && parsedCount > 0 && (
+        <div className="lp-batch-box">
+          <div className="lp-norm-header">
+            <span className="lp-raw-badge success-badge">BATCH</span>
+            <span className="lp-raw-title">
+              {isParsing
+                ? `Parsing record ${parsedCount} of ${batchRecords.length}…`
+                : `${batchRecords.length} normalized records stored in ELA database`}
+            </span>
+          </div>
+          <div className="lp-batch-table-wrapper">
+            <table className="lp-batch-table">
+              <thead>
+                <tr>
+                  <th className="lp-batch-th lp-batch-th-num">#</th>
+                  {parsedFields.map((f) => (
+                    <th key={f.name} className="lp-batch-th">{f.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {batchRecords.slice(0, parsedCount).map((r) => (
+                  <tr key={r.lineNum} className="lp-batch-row field-anim">
+                    <td className="lp-batch-td lp-batch-td-num">{r.lineNum}</td>
+                    {parsedFields.map((f) => {
+                      const match = r.fields.find((rf) => rf.name === f.name);
+                      return (
+                        <td
+                          key={f.name}
+                          className="lp-batch-td"
+                          style={match ? { color: f.color } : undefined}
+                        >
+                          {match?.value || '—'}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

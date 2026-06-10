@@ -275,3 +275,132 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Confidence score pill */
+.lp-confidence-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+.lp-confidence-high {
+  background: rgba(46, 204, 113, 0.12);
+  color: #4ade80;
+  border-color: rgba(46, 204, 113, 0.3);
+}
+
+.lp-confidence-medium {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.lp-confidence-low {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Download JSON button */
+.lp-download-btn {
+  margin-left: auto;
+}
+
+/* Batch mode pill in raw log header */
+.lp-batch-pill {
+  margin-left: auto;
+  background: rgba(99, 179, 237, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(99, 179, 237, 0.25);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+}
+
+/* Batch records table */
+.lp-batch-box {
+  background: var(--bg-card);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.lp-batch-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lp-batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.lp-batch-th {
+  padding: 0.55rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lp-batch-th-num {
+  width: 2.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.lp-batch-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.1s;
+}
+
+.lp-batch-row:last-child {
+  border-bottom: none;
+}
+
+.lp-batch-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lp-batch-td {
+  padding: 0.45rem 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.76rem;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lp-batch-td-num {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-family: monospace;
+  padding: 0.45rem 0.5rem;
+}
+
+/* Fade-in animation for result panels */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease both;
+}
